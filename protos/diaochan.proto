@@ -1,0 +1,85 @@
+// diaochan的接口定义
+
+syntax = "proto3";
+import "basic.proto";
+
+package diaochan;
+
+//召回信息
+message RecallInfo {
+    string name = 1; //召回名称
+    string tag = 2;  //查询key
+    string version = 3; //版本
+    string proiority = 4; //召回优先级
+    string limit = 5; //召回数量
+}
+
+//召回接口
+message RecallRequest {
+    string bid = 1; //曝光ID 必填
+    string uid = 2; //用户UID 用户召回必填
+    string mid = 3; //物料MID 相关推荐召回必填
+    string channel = 4; //指定的召回渠道名称 必填
+    string version = 5; //召回的版本 必填
+    FeatList context = 6;    // 可以存放源物料的特征，用户的特征，上下文特征等
+    int32 num = 7; //返回召回物料的数量 必填
+    bool debug = 8; // 可以不设置。默认为False。
+    repeated RecallInfo info = 9; //召回信息列表
+}
+
+message Video {
+    string mid = 1;
+    //float score = 2;
+    string name = 3;
+    repeated Feature feat = 4;
+}
+
+//召回的返回结果
+message RecallReply {
+    string bid = 1;     //曝光ID 必填
+
+    // 状态: 小于0为不正常
+    // 0: 正常返回
+    // -1: 其它错误
+    // -2: channel或者version无效
+    // -3: 参数检查有误
+    // -4: 召回引擎报错
+    // -5: 读取IO报错
+    int32 status = 2;
+    string errmsg = 3;  //错误信息
+
+    repeated string mid = 4;    //返回的召回mid列表 必填
+    repeated float mscore = 5; //对应召回mid的分数 必填
+    repeated FeatList mfeas = 6; //对应召回mid的特征列表
+    FeatList otherfeas = 7; //召回能够输出的其它特征 和具体候选物料无关但是对排序有用的特征
+
+    repeated string debuginfo = 8; //debug=True返回的各种debug信息
+}
+
+//服务状态检查
+message StatusRequest {
+
+}
+
+message StatusReply {
+    // 状态：true表示正常
+    bool status = 1;
+    repeated string detail = 2;
+}
+
+service Diaochan {
+
+    // 根据导流物料排序。
+    rpc Recall(RecallRequest) returns (RecallReply) {}
+
+    rpc RecallVvs(RecallRequest) returns (RecallReply) {}
+
+    rpc RecallEsTag(RecallRequest) returns (RecallReply) {}
+
+    rpc RecallBlack(RecallRequest) returns (RecallReply) {}
+
+    rpc RecallDssm(RecallRequest) returns (RecallReply) {}
+
+    // 服务状态检查 TODO
+    rpc Status(StatusRequest) returns (StatusReply) {}
+}

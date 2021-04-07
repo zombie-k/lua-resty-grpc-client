@@ -1,0 +1,13 @@
+// 基础消息格式
+
+syntax = "proto3";
+
+message Feature {
+    string fid = 1;
+    bytes val = 2;
+}
+
+message FeatList {
+    string id = 1;
+    repeated Feature feat = 2;
+}
