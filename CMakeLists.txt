@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(helloworld)
+project(cgrpc)
 
 set(ENV{PKG_CONFIG_PATH} /usr/local/lib/pkgconfig)
 
@@ -27,6 +27,7 @@ set (OPENSSL_ROOT_DIR "/usr/local/Cellar/openssl@1.1/1.1.1h")
 find_package(OpenSSL REQUIRED)
 message(STATUS ${OPENSSL_ROOT_DIR})
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -I/usr/local/include -L/usr/local/lib -lprotobuf -lpthread -L/usr/local/include/grpc++ -lgrpc++ -L/usr/local/include/grpc -lgrpc -g -O3 -Wall -fPIC -fno-var-tracking -DRAPIDJSON_HAS_STDSTRING")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -I/usr/local/include -L/usr/local/lib -lprotobuf -lpthread -L/usr/local/include/grpc++ -lgrpc++ -L/usr/local/include/grpc -lgrpc -g -O3 -Wall -fPIC -fno-var-tracking -DRAPIDJSON_HAS_STDSTRING")
 
 set(_GRPC_GRPCPP gRPC::grpc++)
@@ -62,7 +63,9 @@ foreach(proto_name ${files})
 endforeach()
 
 #add_library(helloworld SHARED main.cpp ${proto_srcs} ${grpc_srcs} src/helloworld/libclient.cc)
-add_library(helloworld SHARED src/helloworld/libclient.cc ${proto_srcs} ${grpc_srcs} src/helloworld/libclient.cc)
+#add_library(cgrpc SHARED src/helloworld/libclient.cc ${proto_srcs} ${grpc_srcs} src/helloworld/libclient.cc src/diaochan/diaochan.cc src/diaochan/diaochan.h)
+add_executable(cgrpc main.cpp ${proto_srcs} ${grpc_srcs} src/diaochan/diaochan.cc src/diaochan/diaochan.h)
+#add_library(cgrpc SHARED src/helloworld/libclient.cc ${proto_srcs} ${grpc_srcs} src/helloworld/libclient.cc)
 #add_library(helloworld SHARED helloworld/libclient.cpp helloworld/greeter_client.h ${proto_srcs} ${grpc_srcs})
 #add_library(helloworld main.cpp ${proto_srcs} ${grpc_srcs} src/helloworld/greeter_client.cc src/helloworld/greeter_client.h)
 #target_link_libraries(helloworld ${_REFLECTION} ${_GRPC_GRPCPP} ${_PROTOBUF_LIBPROTOBUF})

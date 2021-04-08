@@ -2,8 +2,8 @@
 // Created by xiangqian5 on 2021/4/7.
 //
 
-#ifndef HELLOWORLD_GREETER_CLIENT_H
-#define HELLOWORLD_GREETER_CLIENT_H
+#ifndef CGRPC_GREETER_CLIENT_H
+#define CGRPC_GREETER_CLIENT_H
 #include <memory>
 #include <grpcpp/grpcpp.h>
 #include "src/pb/helloworld.grpc.pb.h"
@@ -51,4 +51,4 @@ private:
 };
 
 
-#endif //HELLOWORLD_GREETER_CLIENT_H
+#endif //CGRPC_GREETER_CLIENT_H

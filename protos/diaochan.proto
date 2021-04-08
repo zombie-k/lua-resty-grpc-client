@@ -5,15 +5,6 @@ import "basic.proto";
 
 package diaochan;
 
-//召回信息
-message RecallInfo {
-    string name = 1; //召回名称
-    string tag = 2;  //查询key
-    string version = 3; //版本
-    string proiority = 4; //召回优先级
-    string limit = 5; //召回数量
-}
-
 //召回接口
 message RecallRequest {
     string bid = 1; //曝光ID 必填
@@ -24,14 +15,6 @@ message RecallRequest {
     FeatList context = 6;    // 可以存放源物料的特征，用户的特征，上下文特征等
     int32 num = 7; //返回召回物料的数量 必填
     bool debug = 8; // 可以不设置。默认为False。
-    repeated RecallInfo info = 9; //召回信息列表
-}
-
-message Video {
-    string mid = 1;
-    //float score = 2;
-    string name = 3;
-    repeated Feature feat = 4;
 }
 
 //召回的返回结果
