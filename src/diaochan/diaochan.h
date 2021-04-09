@@ -11,6 +11,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
+#include <google/protobuf/util/json_util.h>
 #include "src/pb/diaochan.grpc.pb.h"
 
 
@@ -31,9 +32,10 @@ public:
     : stub_(Diaochan::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()))),timeout_(timeout)
     {}
 
-    std::string Recall(const std::string& user);
+    std::string Recall(const std::string& param);
 
-    int generate_diaochan(RecallReply* reply, std::string& result);
+    int generate_reply(RecallReply* reply, std::string& result);
+    int generate_request(RecallRequest& req, const std::string& input);
 
 private:
     std::unique_ptr<Diaochan::Stub> stub_;

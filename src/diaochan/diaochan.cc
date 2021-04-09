@@ -4,35 +4,13 @@
 
 #include "diaochan.h"
 
-std::string CDiaochan::Recall(const std::string& user) {
+std::string CDiaochan::Recall(const std::string& param) {
     // Data we are sending to the server.
     RecallRequest request;
-    request.set_bid("123456700000");
-    request.set_uid("5014976811");
-    request.set_mid("4622872562107300");
-    request.set_channel("profile_merge_v4");
-    request.set_version("pro_s");
-    request.set_num(5);
-    FeatList *context_fl = request.mutable_context();
-    Feature *ft = context_fl->add_feat();
-    ft->set_fid("page");
-    ft->set_val("1");
-
-    ft = context_fl->add_feat();
-    ft->set_fid("uicode");
-    ft->set_val("1008");
-
-    ft = context_fl->add_feat();
-    ft->set_fid("network");
-    ft->set_val("4g");
-
-    ft = context_fl->add_feat();
-    ft->set_fid("pid");
-    ft->set_val("824");
-
-    ft = context_fl->add_feat();
-    ft->set_fid("source");
-    ft->set_val("100000");
+    int ok = generate_request(request, param);
+    if (ok != 0) {
+        return "Param parse error.";
+    }
 
     // Container for the data we expect from the server.
     RecallReply reply;
@@ -50,18 +28,80 @@ std::string CDiaochan::Recall(const std::string& user) {
 
     if (status.ok()) {
         std::string result = "";
-        generate_diaochan(&reply, result);
-        //google::protobuf::util::MessageToJsonString(reply, &reply_str);
-        //std::cout << reply_str << std::endl;
+        generate_reply(&reply, result);
         return result;
     } else {
-        std::cout << status.error_code() << ": " << status.error_message()
-                  << std::endl;
-        return "RPC failed";
+        char buff[100];
+        snprintf(buff, sizeof(buff), "%d:%s", status.error_code(), status.error_message().c_str());
+        std::string buffAsStdStr = buff;
+        return buffAsStdStr;
     }
 }
 
-int CDiaochan::generate_diaochan(RecallReply *reply, std::string& result)
+int CDiaochan::generate_request(RecallRequest& req, const std::string& input) {
+    Document doc;
+    doc.Parse(input);
+    if (!doc.IsObject()) {
+        return -1;
+    }
+
+    auto itr = doc.FindMember("bid");
+    if (itr != doc.MemberEnd()) {
+        req.set_bid(itr->value.GetString());
+    }
+
+    itr = doc.FindMember("mid");
+    if (itr != doc.MemberEnd()) {
+        req.set_mid(itr->value.GetString());
+    }
+
+    itr = doc.FindMember("uid");
+    if (itr != doc.MemberEnd()) {
+        req.set_uid(itr->value.GetString());
+    }
+
+    itr = doc.FindMember("channel");
+    if (itr != doc.MemberEnd()) {
+        req.set_channel(itr->value.GetString());
+    }
+
+    itr = doc.FindMember("version");
+    if (itr != doc.MemberEnd()) {
+        req.set_version(itr->value.GetString());
+    }
+
+    itr = doc.FindMember("num");
+    if (itr != doc.MemberEnd()) {
+        req.set_num(itr->value.GetInt());
+    }
+
+    itr = doc.FindMember("debug");
+    if (itr != doc.MemberEnd()) {
+        req.set_debug(itr->value.GetBool());
+    }
+
+    itr = doc.FindMember("context");
+    if (itr != doc.MemberEnd()) {
+        FeatList *context_fl = req.mutable_context();
+        auto context_obj = itr->value.GetObject();
+        auto itr_context_id = context_obj.FindMember("id");
+        if (itr_context_id != context_obj.MemberEnd()) {
+            context_fl->set_id(itr_context_id->value.GetString());
+        }
+
+        auto itr_context_feat = context_obj.FindMember("feat");
+        if (itr_context_feat != context_obj.MemberEnd()) {
+            for (auto& f : itr_context_feat->value.GetArray()) {
+                Feature *ft = context_fl->add_feat();
+                ft->set_fid(f["fid"].GetString());
+                ft->set_val(f["val"].GetString());
+            }
+        }
+    }
+    return 0;
+}
+
+int CDiaochan::generate_reply(RecallReply *reply, std::string& result)
 {
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
