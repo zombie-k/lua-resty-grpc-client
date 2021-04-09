@@ -6,8 +6,6 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif()
 
 set(CMAKE_CXX_STANDARD 17)
-message(${CMAKE_C_COMPILER})
-message(${CMAKE_CXX_COMPILER})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
