@@ -13,7 +13,7 @@ extern "C" {
     void delete_diaochan(CDiaochan* diaochan) {
         delete diaochan;
     }
-    char* recall(CDiaochan* diaochan, const char* word) {
-        return strdup(diaochan->Recall(word).c_str());
+    char* recall(CDiaochan* diaochan, const char* global, const char* context) {
+        return strdup(diaochan->Recall(global, context).c_str());
     }
 }

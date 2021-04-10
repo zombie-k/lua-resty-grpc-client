@@ -4,18 +4,13 @@
 
 #include "diaochan.h"
 
-std::string CDiaochan::Recall(const std::string& global_param, const std::string& context_param) {
+std::string CDiaochan::Recall(const std::string& param) {
     // Data we are sending to the server.
     RecallRequest request;
-    int ok = generate_request(request, global_param, context_param);
+    int ok = generate_request(request, param);
     if (ok != 0) {
         return "Param parse error.";
     }
-#ifdef DEBUG
-    std::string req;
-    google::protobuf::util::MessageToJsonString(request, &req);
-    std::cout << req << std::endl;
-#endif
 
     // Container for the data we expect from the server.
     RecallReply reply;
@@ -43,9 +38,9 @@ std::string CDiaochan::Recall(const std::string& global_param, const std::string
     }
 }
 
-int CDiaochan::generate_request(RecallRequest& req, const std::string& global_param, const std::string& context_param) {
+int CDiaochan::generate_request(RecallRequest& req, const std::string& input) {
     Document doc;
-    doc.Parse(global_param);
+    doc.Parse(input);
     if (!doc.IsObject()) {
         return -1;
     }
@@ -85,23 +80,22 @@ int CDiaochan::generate_request(RecallRequest& req, const std::string& global_pa
         req.set_debug(itr->value.GetBool());
     }
 
-    Document doc_context;
-    doc_context.Parse(context_param);
-
-    if (doc_context.IsObject()) {
-        FeatList *req_context = req.mutable_context();
-        itr = doc_context.FindMember("id");
-        if (itr != doc_context.MemberEnd()) {
-            req_context->set_id(itr->value.GetString());
-            doc_context.RemoveMember(itr->name.GetString());
+    itr = doc.FindMember("context");
+    if (itr != doc.MemberEnd()) {
+        FeatList *context_fl = req.mutable_context();
+        auto context_obj = itr->value.GetObject();
+        auto itr_context_id = context_obj.FindMember("id");
+        if (itr_context_id != context_obj.MemberEnd()) {
+            context_fl->set_id(itr_context_id->value.GetString());
         }
 
-        for (Value::ConstMemberIterator iter = doc_context.MemberBegin(); iter != doc_context.MemberEnd(); ++iter) {
-            const char* fid = iter->name.GetString();
-            const char* val = iter->value.GetString();
-            Feature *ft = req_context->add_feat();
-            ft->set_fid(fid);
-            ft->set_val(val);
+        auto itr_context_feat = context_obj.FindMember("feat");
+        if (itr_context_feat != context_obj.MemberEnd()) {
+            for (auto& f : itr_context_feat->value.GetArray()) {
+                Feature *ft = context_fl->add_feat();
+                ft->set_fid(f["fid"].GetString());
+                ft->set_val(f["val"].GetString());
+            }
         }
     }
     return 0;
@@ -168,12 +162,8 @@ int CDiaochan::generate_reply(RecallReply *reply, std::string& result)
     FeatList otherfeas_vec = reply->otherfeas();
     writer.Key("otherfeas");
     writer.StartObject();
-
     writer.Key("id");
     writer.String(otherfeas_vec.id());
-
-    writer.Key("feat");
-    writer.StartArray();
     for (const auto& feat : otherfeas_vec.feat()) {
         writer.StartObject();
         writer.Key("fid");
@@ -182,8 +172,6 @@ int CDiaochan::generate_reply(RecallReply *reply, std::string& result)
         writer.String(std::any_cast<std::string>(feat.val()));
         writer.EndObject();
     }
-    writer.EndArray();// end feat
-
     writer.EndObject();
     // otherfeas end
 

@@ -32,10 +32,10 @@ public:
     : stub_(Diaochan::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()))),timeout_(timeout)
     {}
 
-    std::string Recall(const std::string& param);
+    std::string Recall(const std::string& global_param, const std::string& context_param);
 
-    int generate_reply(RecallReply* reply, std::string& result);
-    int generate_request(RecallRequest& req, const std::string& input);
+    static int generate_reply(RecallReply* reply, std::string& result);
+    static int generate_request(RecallRequest& req, const std::string& global_param, const std::string& context_param);
 
 private:
     std::unique_ptr<Diaochan::Stub> stub_;

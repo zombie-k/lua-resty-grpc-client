@@ -1,20 +1,18 @@
 #include <iostream>
 #include "src/diaochan/diaochan.h"
 #include "src/pb/helloworld.pb.h"
-using namespace rapidjson;
+//using namespace rapidjson;
 using namespace std;
 
 void test1() {
-    std::string target("i.diaochan.recom.weibo.com:5001");
-    //std::string target("10.185.12.134:10471");
+    //std::string target("i.diaochan.recom.weibo.com:5001");
+    std::string target("10.182.11.176:10810");
     CDiaochan cd(target, 50000);
-    //std::string json = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"\",\"channel\":\"profile_merge_v4\",\"debug\":true,\"version\":\"pro_l\",\"context\":{\"id\":\"\",\"feat\":[{\"fid\":\"page\",\"val\":\"1\"},{\"fid\":\"pid\",\"val\":\"827\"},{\"fid\":\"network\",\"val\":\"4g\"}]}}";
-    std::string json = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"\",\"channel\":\"profile_merge_v4\",\"debug\":true,\"version\":\"pro_l\",\"context\":{\"id\":\"\",\"feat\":[{\"fid\":\"page\",\"val\":\"1\"},{\"fid\":\"pid\",\"val\":\"827\"},{\"fid\":\"network\",\"val\":\"4g\"},{\"fid\":\"test\",\"val\":\"{\\\"t\\\":1,\\\"b\\\":2}\"}]}}";
-    //std::string json = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"\",\"channel\":\"profile_merge_v4\",\"debug\":true,\"version\":\"pro_l\",\"context\":{\"id\":\"\",\"feat\":[{\"fid\":\"page\",\"val\":\"\\97\"}]}}";
-    std::string reply = cd.Recall(json);
+    //std::string global = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"realtime_general\",\"debug\":true,\"version\":\"hql_v3\"}";
+    std::string global = "{\"num\":10,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
+    std::string context = "{\"id\":\"4618656153081522\",\"page\":\"1\",\"pid\":\"824\",\"network\":\"4g\",\"source\":\"100001\",\"1197\":\"5\",\"1210\":\"5\",\"1209\":\"5\"}";
+    std::string reply = cd.Recall(global, context);
     std::cout << "reply:" << reply << std::endl;
-    //reply = cd.Recall("hello");
-    //std::cout << "reply:" << reply << std::endl;
 }
 
 void test2() {
@@ -55,7 +53,27 @@ void test4() {
     std::string json_string = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"\",\"channel\":\"profile_merge_v4\",\"debug\":true,\"version\":\"pro_l\",\"context\":{\"id\":\"BBBB\",\"feat\":[{\"fid\":\"page\",\"val\":\"1\"},{\"fid\":\"t1\",\"val\":\"fffff\"},{\"fid\":\"t2\",\"val\":\"asdfj134\"}]}}";
     doc.Parse(json_string);
     for (Value::ConstMemberIterator iter = doc.MemberBegin(); iter != doc.MemberEnd(); ++iter) {
-        std::cout << iter->name.GetString() << "  " << iter->value.GetType() << std::endl;
+        std::cout << iter->name.GetString() << "  " << iter->value.GetType() << "  " << kTypeNames[iter->value.GetType()] << std::endl;
+        const rapidjson::Value& name_json = iter->name;
+        const rapidjson::Value& value_json = iter->value;
+        switch (value_json.GetType()) {
+            case rapidjson::kNullType:
+                break;
+            case rapidjson::kTrueType:
+                std::cout << name_json.GetString() << " " << kTypeNames[iter->value.GetType()] << value_json.GetBool() << std::endl;
+                break;
+            case rapidjson::kFalseType:
+                std::cout << name_json.GetString() << " " << kTypeNames[iter->value.GetType()] << value_json.GetBool() << std::endl;
+                break;
+            case rapidjson::kNumberType:
+                std::cout << name_json.GetString() << " " << kTypeNames[iter->value.GetType()] << value_json.GetInt() << std::endl;
+                break;
+            case rapidjson::kStringType:
+                std::cout << name_json.GetString() << " " << kTypeNames[iter->value.GetType()] << " "<< value_json.GetString() << std::endl;
+                break;
+            default:
+                break;
+        }
     }
 
     auto ibid = doc.FindMember("bid");
