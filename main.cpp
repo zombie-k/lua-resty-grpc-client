@@ -1,4 +1,5 @@
 #include <iostream>
+#include <src/helloworld/greeter_client.h>
 #include "src/diaochan/diaochan.h"
 #include "src/pb/helloworld.pb.h"
 //using namespace rapidjson;
@@ -9,9 +10,23 @@ void test1() {
     std::string target("10.182.11.176:10810");
     CDiaochan cd(target, 50000);
     //std::string global = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"realtime_general\",\"debug\":true,\"version\":\"hql_v3\"}";
-    std::string global = "{\"num\":10,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
+    //std::string global = "{\"num\":10,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
+    std::string global = "{\"num\":10,\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
     std::string context = "{\"id\":\"4618656153081522\",\"page\":\"1\",\"pid\":\"824\",\"network\":\"4g\",\"source\":\"100001\",\"1197\":\"5\",\"1210\":\"5\",\"1209\":\"5\"}";
     std::string reply = cd.Recall(global, context);
+    std::cout << "reply:" << reply << std::endl;
+}
+
+void async_test1() {
+
+    std::string target("i.diaochan.recom.weibo.com:5001");
+    //std::string target("10.182.11.176:10810");
+    AsyncDiaochan cd(target, 20000);
+    //std::string global = "{\"num\":5,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"realtime_general\",\"debug\":true,\"version\":\"hql_v3\"}";
+    std::string global = "{\"num\":10,\"bid\":\"0000000000000000161793518822426129908645\",\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
+    //std::string global = "{\"num\":10,\"uid\":\"6129908645\",\"mid\":\"4618656153081522\",\"channel\":\"profile_merge_v2\",\"debug\":true,\"version\":\"hql_v3\"}";
+    std::string context = "{\"id\":\"4618656153081522\",\"page\":\"1\",\"pid\":\"824\",\"network\":\"4g\",\"source\":\"100001\",\"1197\":\"5\",\"1210\":\"5\",\"1209\":\"5\"}";
+    std::string reply = cd.AsyncRecall(global, context);
     std::cout << "reply:" << reply << std::endl;
 }
 
@@ -140,12 +155,21 @@ void test5() {
     reader.Parse(ss, handler);
 }
 
+void async_helloworld() {
+    AsyncGreeterClient greeter("localhost:50051");
+    std::string user("world");
+    std::string reply = greeter.AsyncSayHello(user);  // The actual RPC call!
+    std::cout << "Greeter received: " << reply << std::endl;
+}
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    test1();
+    //test1();
     //test2();
     //test3();
     //test4();
+    async_test1();
+    //async_helloworld();
     return 0;
 }
 

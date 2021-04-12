@@ -21,6 +21,8 @@ using ::google::protobuf::RepeatedField;
 using grpc::Channel;
 using grpc::ClientContext;
 using grpc::Status;
+using grpc::ClientAsyncResponseReader;
+using grpc::CompletionQueue;
 using diaochan::RecallRequest;
 using diaochan::RecallReply;
 using diaochan::Diaochan;
@@ -34,12 +36,26 @@ public:
 
     std::string Recall(const std::string& global_param, const std::string& context_param);
 
-    static int generate_reply(RecallReply* reply, std::string& result);
-    static int generate_request(RecallRequest& req, const std::string& global_param, const std::string& context_param);
-
 private:
     std::unique_ptr<Diaochan::Stub> stub_;
     int timeout_;
 };
 
+class AsyncDiaochan {
+public:
+    AsyncDiaochan(const std::string& target, int timeout)
+    :stub_(Diaochan::NewStub(grpc::CreateChannel(target, grpc::InsecureChannelCredentials()))), timeout_(timeout)
+    {}
+
+    std::string AsyncRecall(const std::string& global_param, const std::string& context_param);
+private:
+    std::unique_ptr<Diaochan::Stub> stub_;
+    int timeout_;
+};
+
+class Generate {
+public:
+    static int generate_reply(RecallReply* reply, std::string& result);
+    static int generate_request(RecallRequest& req, const std::string& global_param, const std::string& context_param);
+};
 #endif //CGRPC_DIAOCHAN_H
